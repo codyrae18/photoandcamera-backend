@@ -1,7 +1,7 @@
 class CamerasController < ApplicationController
 
     def index
-        cameras = Category.all 
+        cameras = Camera.all 
         render json: cameras
     end
 
