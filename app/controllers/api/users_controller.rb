@@ -1,11 +1,16 @@
 class Api::UsersController < ApplicationController
-    skip_before_action :authorized, only: [:create]
+    skip_before_action :authorized, only: [:index, :create, :update, :show]
 
-    def index
-        users = User.all 
-        render json: users
+      def index
+        @users = User.all 
+        render json: @users
       end
       
+      def show
+        @user = User.find_by(id: params[:id])
+        render json: @user
+      end
+
      
       def profile
         render json: { user: UserSerializer.new(current_user) }, status: :accepted
@@ -13,6 +18,7 @@ class Api::UsersController < ApplicationController
 
 
       def create
+        # byebug
         @user = User.create(user_params)
         if @user.valid?
           @token = encode_token(user_id: @user.id)
@@ -23,23 +29,16 @@ class Api::UsersController < ApplicationController
       end
     
       def update
-         @user.update(user_params)
-        render json: @user, status: 200
-      end
-    
-      def destroy
-        userId = @user.id
-        @user.destroy
-        render json: {message:"Zap! user deleted", userId:userId}
-      end
-    
-      def show
-        render json: @user, status: 200
+        
+        @user = User.find(params[:id])
+        @user.image.attach(params[:image])
+        byebug
+        render json: @user.as_json, status: 200
       end
     
       private
       def user_params
-        params.require(:user).permit(:name, :username, :password, :password_digest, :description)
+        params.require(:user).permit(:id, :name, :username, :password, :password_digest, :description, :image)
       end
     
       def set_user
